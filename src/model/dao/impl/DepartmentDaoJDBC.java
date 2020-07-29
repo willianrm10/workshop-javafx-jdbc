@@ -50,7 +50,7 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT * FROM department ORDER BY Name");
+			st = conn.prepareStatement("SELECT * FROM department ORDER BY Id");
 			rs = st.executeQuery();
 
 			List<Department> list = new ArrayList<>();
