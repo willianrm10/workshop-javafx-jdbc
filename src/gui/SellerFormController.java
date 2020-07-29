@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +54,7 @@ public class SellerFormController implements Initializable {
 	@FXML
 	private DatePicker dpBirthDate;
 	@FXML
-	private TextField txtBasesalary;
+	private TextField txtBaseSalary;
 
 	@FXML
 	private ComboBox<Department> comboBoxDepartment;
@@ -62,7 +64,7 @@ public class SellerFormController implements Initializable {
 	@FXML
 	private Label labelErrorEmail;
 	@FXML
-	private Label labelErrorBarthDate;
+	private Label labelErrorBirthDate;
 	@FXML
 	private Label labelErrorBaseSalary;
 
@@ -126,6 +128,26 @@ public class SellerFormController implements Initializable {
 		}
 		obj.setName(txtName.getText());
 
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			excetion.addError("email", "O campo não pode ser vazio");
+		}
+		obj.setEmail(txtEmail.getText());
+
+		if (dpBirthDate.getValue() == null) {
+			excetion.addError("birthDate", "O campo não pode ser vazio");
+		} else {
+			Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			obj.setBirthDate(Date.from(instant));
+		}
+
+		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+			excetion.addError("baseSalary", "O campo não pode ser vazio");
+		}
+		obj.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+		
+		
+		obj.setDepartment(comboBoxDepartment.getValue());
+
 		if (excetion.getErrors().size() > 0) {
 			throw excetion;
 		}
@@ -147,10 +169,10 @@ public class SellerFormController implements Initializable {
 	private void initializeNodes() {// limita os caracteres a ser informado no campo de texto
 		Constraints.setTextFieldInteger(txtId);
 		Constraints.setTextFieldMaxLength(txtName, 70);
-		Constraints.setTextFieldDouble(txtBasesalary);
+		Constraints.setTextFieldDouble(txtBaseSalary);
 		Constraints.setTextFieldMaxLength(txtEmail, 60);
 		Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
-		
+
 		initializeComboBoxDepartment();
 	}
 
@@ -161,16 +183,18 @@ public class SellerFormController implements Initializable {
 		txtId.setText(String.valueOf(entity.getId()));
 		txtName.setText(entity.getName());
 		txtEmail.setText(entity.getEmail());
+
+		txtBaseSalary.setText(String.format("%.2f", entity.getBaseSalary()));
 		Locale.setDefault(Locale.US);
-		txtBasesalary.setText(String.format("%.2f", entity.getBaseSalary()));
+
 		if (entity.getBirthDate() != null) {
 			dpBirthDate.setValue(LocalDate.ofInstant(entity.getBirthDate().toInstant(), ZoneId.systemDefault()));
 		}
-		
-		if(entity.getDepartment() == null) {
+
+		if (entity.getDepartment() == null) {
 			comboBoxDepartment.getSelectionModel().selectFirst();
-		}else {
-		comboBoxDepartment.setValue(entity.getDepartment());
+		} else {
+			comboBoxDepartment.setValue(entity.getDepartment());
 		}
 	}
 
@@ -189,7 +213,21 @@ public class SellerFormController implements Initializable {
 
 		if (fields.contains("Name")) {
 			labelErrorName.setText(errors.get("Name"));
+		}else {
+			labelErrorName.setText("");
+		}
 
+		if (fields.contains("email")) {
+			labelErrorEmail.setText(errors.get("email"));
+
+		}
+
+		if (fields.contains("baseSalary")) {
+			labelErrorBaseSalary.setText(errors.get("baseSalary"));
+		}
+
+		if (fields.contains("birthDate")) {
+			labelErrorBirthDate.setText(errors.get("birthDate"));
 		}
 
 	}
